@@ -4,9 +4,12 @@ import io
 import time
 from pathlib import Path
 import itertools
+from typing import Optional
 
 
-def tar_mode(gzip=None, xz=None, is_pipe=None):
+def tar_mode(gzip: Optional[bool] = None,
+             xz: Optional[bool] = None,
+             is_pipe: Optional[bool] = None):
     """ Return tarfile.open compatible mode from boolean flags
 
     """
@@ -82,3 +85,12 @@ def add_txt_file(tar, fname, content, mode=0o644, last_modified=None):
     info.mtime = last_modified
     info.mode = mode
     tar.addfile(tarinfo=info, fileobj=io.BytesIO(content))
+
+
+class TarWriter:
+    def __init__(self,
+                 fname: str,
+                 gzip: Optional[bool] = None,
+                 xz: Optional[bool] = None,
+                 is_pipe: Optional[bool] = None):
+        pass
