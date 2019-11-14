@@ -2,7 +2,6 @@
 
 """
 
-from . import resolve_nodata
 import rasterio
 import rasterio.warp
 import rasterio.crs
@@ -17,7 +16,7 @@ def make_pixel_extractor(mode='pixel',
                          dst_nodata=NOTSET):
     """Returns function that can extract single pixel from opened rasterio file.
 
-    Signature of returned function is:
+    Signature of the returned function is:
         `src, coordinate_tuple, [band] -> pixel`
 
     Where coordinate_tuple is interpreted according to `mode`
@@ -56,9 +55,9 @@ def make_pixel_extractor(mode='pixel',
     def extract_pixel(src, coord, band=default_band):
         ri, ci = coord
 
-        src_nodata = resolve_nodata(src, band,
-                                    fallback=src_nodata_fallback,
-                                    override=src_nodata_override)
+        src_nodata = _resolve_nodata(src, band,
+                                     fallback=src_nodata_fallback,
+                                     override=src_nodata_override)
 
         dst_nodata = _dst_nodata(src_nodata)
 
@@ -87,6 +86,24 @@ def make_pixel_extractor(mode='pixel',
 
     extractor = extractors.get(mode)
     if extractor is None:
-        raise ValueError('Only support mode=<pixel|nativie|lonlat>')
+        raise ValueError('Only support mode=<pixel|native|lonlat>')
 
     return extractor
+
+
+def _resolve_nodata(src, band, fallback=None, override=None):
+    """Figure out what value to use for nodata given a band and fallback/override
+    settings
+
+    :param src: Rasterio file
+    """
+    if override is not None:
+        return override
+
+    band0 = band if isinstance(band, int) else band[0]
+    nodata = src.nodatavals[band0 - 1]
+
+    if nodata is None:
+        return fallback
+
+    return nodata
