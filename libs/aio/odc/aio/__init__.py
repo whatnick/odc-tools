@@ -313,10 +313,10 @@ class S3Fetcher(object):
 
         async def setup(s3_cfg):
             session = aiobotocore.get_session()
-            s3 = session.create_client('s3',
-                                       region_name=region_name,
-                                       config=s3_cfg)
-            return (session, s3)
+            async with session.create_client('s3',
+                                             region_name=region_name,
+                                             config=s3_cfg) as s3:
+                return (session, s3)
 
         session, s3 = self._async.submit(setup, s3_cfg).result()
         self._session = session
